@@ -1,0 +1,26 @@
+{
+    "name": "molovo/phake",
+    "description": "A PHP task runner inspired by Make, Rake et al.",
+    "keywords": ["phake"],
+    "license": "MIT",
+    "authors": [
+      {
+        "name": "James Dinsdale",
+        "email": "hi@molovo.co"
+      }
+    ],
+    "require": {
+      "molovo/prompt": "~0.1"
+    },
+    "autoload": {
+      "psr-4": {
+        "Phake\\": "src/Phake"
+      },
+      "files": [
+        "src/Phake/helpers.php"
+      ]
+    },
+    "bin": [
+      "phake"
+    ]
+}
