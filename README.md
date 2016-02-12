@@ -111,7 +111,7 @@ phake my_group
 #   Task One!
 #   Task Two!
 
-phake my_group task_one
+phake my_group:task_one
 # Output:
 #   Task One!
 ```
@@ -132,6 +132,17 @@ group('group', function() {
 
 ```sh
 phake group
+# Ouptut:
+#   I'm in the parent group
+#   I'm in the subgroup
+```
+
+#### Running multiple tasks
+
+Each argument to `phake` is a task, and multiple tasks can be run by simply passing them all to phake. Based on the groups example above, this would give the same results as `phake group`:
+
+```sh
+phake group:first_task group:subgroup:second_task
 # Ouptut:
 #   I'm in the parent group
 #   I'm in the subgroup
