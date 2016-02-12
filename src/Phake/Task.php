@@ -151,7 +151,7 @@ class Task
         // Output a success message to the screen
         $time = ceil((microtime(true) - $time) * 1000);
         $msg  = 'Task '.$this->name.' finished in '.$time.'ms';
-        Prompt::output($msg);
+        Prompt::output(ANSI::fg($msg, ANSI::GRAY));
         Prompt::output('');
     }
 }

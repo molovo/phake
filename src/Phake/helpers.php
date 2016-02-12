@@ -1,6 +1,6 @@
 <?php
 
-use Phake\Run;
+use Phake\Runner;
 use Phake\Task;
 
 if (!function_exists('task')) {
@@ -12,8 +12,24 @@ if (!function_exists('task')) {
      */
     function task($name, $callback)
     {
-        $task = new Task($name, $callback);
-        Run::registerTask($task);
+        $task   = new Task($name, $callback);
+        $runner = Runner::current();
+        $runner->registerTask($task);
+    }
+}
+
+if (!function_exists('group')) {
+    /**
+     * Define a group.
+     *
+     * @param string  $name     The group name
+     * @param Closure $callback A closure containing groups
+     */
+    function group($name, Closure $callback)
+    {
+        $group  = new Runner($name);
+        $runner = Runner::current();
+        $runner->registerGroup($group, $callback);
     }
 }
 
@@ -26,7 +42,7 @@ if (!function_exists('run')) {
      */
     function run($name, array $args = [])
     {
-        $task = Run::task($name);
+        $task = Runner::task($name);
 
         return $task->run($args);
     }
