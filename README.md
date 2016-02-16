@@ -48,7 +48,7 @@ The first parameter is the name of the task.
 task('my_awesome_task', 'echo "Doing awesome things..."');
 ```
 
-To run that task, run `phase my_awesome_task`.
+To run that task, run `phake my_awesome_task`.
 
 #### Multiple commands
 
