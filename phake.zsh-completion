@@ -1,0 +1,25 @@
+#compdef phake
+
+_phake() {
+  local curcontext="$curcontext" state line
+  local commands
+
+  commands=( \
+    'tasks:List all tasks defined in the Phakefile.' \
+    'groups:List all groups defined in the Phakefile.' \
+  )
+
+  _arguments -s -S \
+    '--dir[Specify a custom working directory.]' \
+    '--phakefile[Specify a custom Phakefile.]' \
+    '--help[Show help text and exit.]' \
+    '--version[Show version information and exit.]'
+
+  _describe 'command' commands
+
+  _alternative \
+    "tasks:task:($(phake tasks))" \
+    "groups:group:($(phake groups))"
+}
+
+_phake "$@"

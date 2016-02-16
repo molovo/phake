@@ -147,3 +147,21 @@ phake group:first_task group:subgroup:second_task
 #   I'm in the parent group
 #   I'm in the subgroup
 ```
+
+## Options
+
+By default phake looks for a `Phakefile` in the directory in which it is called.
+To use a custom directory, pass a path to the `--dir` (`-d`) option.
+
+```sh
+phake --dir=/path/to/root
+phake -d/path/to/root
+```
+
+To use a different filename, or a Phakefile outside of the directory, use the
+`--phakefile` (`-f`) option.
+
+```sh
+phake --phakefile=/your/custom/file
+phake -f/your/custom/file
+```

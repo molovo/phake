@@ -40,6 +40,16 @@ class Runner
     public $parent = null;
 
     /**
+     * Commands which can be called directly.
+     *
+     * @var string[]
+     */
+    public $commands = [
+        'tasks'  => 'List all tasks defined in the Phakefile.',
+        'groups' => 'List all groups defined in the Phakefile.',
+    ];
+
+    /**
      * The current runner context.
      *
      * @var Runner|null
@@ -64,38 +74,118 @@ class Runner
         $this->name = $name;
 
         if ($name === null) {
-            $this->pwd = $_SERVER['PWD'];
-            $phakefile = $this->pwd.'/Phakefile';
-
-            // Check that the phakefile exists
-            if (!file_exists($phakefile)) {
-                throw new PhakefileNotFoundException;
-            }
+            $this->pwd       = $_SERVER['PWD'];
+            $this->phakefile = $this->pwd.'/Phakefile';
 
             static::$current = $this;
 
-            // Require the phakefile
-            require_once $phakefile;
-        }
-    }
+            $this->parseOpts();
 
-    /**
-     * Run tasks.
-     */
-    public function run(array $args = [])
-    {
-        if ($this->name === null) {
+            // Check that the phakefile exists
+            if (!file_exists($this->phakefile)) {
+                throw new PhakefileNotFoundException;
+            }
+
+            // Require the phakefile
+            require_once $this->phakefile;
+
             // Get the arguments passed.
             $args = $_SERVER['argv'];
 
             // The first argument is the script name, so drop it
             array_shift($args);
 
+            foreach ($args as $index => $task) {
+                if (strpos($task, '-') === 0) {
+                    // Argument is an option, so we remove it
+                    unset($args[$index]);
+                    continue;
+                }
+
+                if (isset($this->commands[$task])) {
+                    $this->{$task}();
+                    exit;
+                }
+            }
+
             // Get the task name and check it is defined
             if (count($args) === 0) {
                 $args = ['default'];
             }
+        }
+    }
 
+    /**
+     * Outputs a list of tasks to the screen.
+     *
+     * @param string|null $prefix Any group prefix
+     */
+    public function tasks($prefix = null)
+    {
+        foreach ($this->tasks as $name => $task) {
+            Prompt::output('  '.$prefix.$name);
+        }
+
+        foreach ($this->groups as $group) {
+            $group->tasks($prefix.$group->name.':');
+        }
+    }
+
+    /**
+     * Outputs a list of groups to the screen.
+     *
+     * @param string|null $prefix Any group prefix
+     */
+    public function groups($prefix = null)
+    {
+        foreach ($this->groups as $name => $group) {
+            $prefix = $this->name !== null ? $this->name.':' : '';
+            Prompt::output('  '.$prefix.$name);
+            $group->groups($prefix.$group->name.':');
+        }
+    }
+
+    /**
+     * Parse command line options.
+     */
+    private function parseOpts()
+    {
+        $opts = getopt('hvd::f::', [
+            'help',
+            'version',
+            'dir::',
+            'phakefile::',
+        ]);
+
+        if ((isset($opts['dir']) && ($dir = $opts['dir'])) || (isset($opts['d']) && ($dir = $opts['d']))) {
+            $this->pwd = $dir;
+        }
+
+        if ((isset($opts['phakefile']) && ($file = $opts['phakefile'])) || (isset($opts['f']) && ($file = $opts['f']))) {
+            $this->phakefile = $file;
+        }
+
+        if (isset($opts['version'])) {
+            Prompt::output(ANSI::fg('Phake', ANSI::YELLOW));
+            Prompt::output('Version 0.2.0');
+            exit;
+        }
+
+        if (isset($opts['help'])) {
+            require_once $this->phakefile;
+            Help::render($this);
+            exit;
+        }
+    }
+
+    /**
+     * Run tasks.
+     *
+     * @param array $args An array of arguments
+     */
+    public function run(array $args = [])
+    {
+        if ($this->name === null) {
             // Run the tasks
             foreach ($args as $taskname) {
                 $task = $this->task($taskname);
