@@ -22,6 +22,10 @@ composer require molovo/phake
 vendor/bin/phake task
 ```
 
+#### Installing ZSH Completion
+
+Rename the file `phake.zsh-completion` to `_phake`, and move it somewhere in your `$fpath`. `/usr/local/share/zsh/site-functions/` is usually a good choice.
+
 ## Usage
 
 #### Default Task
