@@ -16,11 +16,10 @@ class Base extends \Exception
      */
     public function __construct($message = null, $code = 0, Exception $previous = null)
     {
-        // Create the parent exception
-        parent::__construct($message, $code, $previous);
+        $this->message = $message ?: $this->message;
 
         // Output the message to stdout
-        $msg = ANSI::fg($message, ANSI::RED);
+        $msg = ANSI::fg($this->message, ANSI::RED);
         Prompt::output($msg);
 
         // Exit with error status
