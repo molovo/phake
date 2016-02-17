@@ -40,16 +40,6 @@ class Runner
     public $parent = null;
 
     /**
-     * Commands which can be called directly.
-     *
-     * @var string[]
-     */
-    public $commands = [
-        'tasks'  => 'List all tasks defined in the Phakefile.',
-        'groups' => 'List all groups defined in the Phakefile.',
-    ];
-
-    /**
      * The current runner context.
      *
      * @var Runner|null
@@ -79,8 +69,6 @@ class Runner
 
             static::$current = $this;
 
-            $this->parseOpts();
-
             // Check that the phakefile exists
             if (!file_exists($this->phakefile)) {
                 throw new PhakefileNotFoundException;
@@ -88,6 +76,8 @@ class Runner
 
             // Require the phakefile
             require_once $this->phakefile;
+
+            $this->parseOpts();
 
             // Get the arguments passed.
             $args = $_SERVER['argv'];
@@ -101,17 +91,14 @@ class Runner
                     unset($args[$index]);
                     continue;
                 }
-
-                if (isset($this->commands[$task])) {
-                    $this->{$task}();
-                    exit;
-                }
             }
 
             // Get the task name and check it is defined
             if (count($args) === 0) {
                 $args = ['default'];
             }
+
+            $this->run($args);
         }
     }
 
@@ -150,11 +137,13 @@ class Runner
      */
     private function parseOpts()
     {
-        $opts = getopt('hvd::f::', [
+        $opts = getopt('hvd::f::tg', [
             'help',
             'version',
             'dir::',
             'phakefile::',
+            'tasks',
+            'groups',
         ]);
 
         if ((isset($opts['dir']) && ($dir = $opts['dir'])) || (isset($opts['d']) && ($dir = $opts['d']))) {
@@ -165,15 +154,25 @@ class Runner
             $this->phakefile = $file;
         }
 
-        if (isset($opts['version'])) {
+        if (isset($opts['version']) || isset($opts['v'])) {
             Prompt::output(ANSI::fg('Phake', ANSI::YELLOW));
             Prompt::output('Version 0.2.0');
             exit;
         }
 
-        if (isset($opts['help'])) {
+        if (isset($opts['help']) || isset($opts['h'])) {
             require_once $this->phakefile;
             Help::render($this);
+            exit;
+        }
+
+        if (isset($opts['tasks']) || isset($opts['t'])) {
+            $this->tasks();
+            exit;
+        }
+
+        if (isset($opts['groups']) || isset($opts['g'])) {
+            $this->groups();
             exit;
         }
     }

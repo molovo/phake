@@ -88,7 +88,7 @@ class Task
         $descriptorspec = array(
             0 => array('pipe', 'r'),
             1 => array('pipe', 'w'),
-            2 => array('file', $cwd.'phake_error.out', 'a'),
+            2 => array('pipe', 'w'),
         );
 
         // An array to store out pipes in

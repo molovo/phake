@@ -18,12 +18,8 @@ class Help
         Prompt::output('  -v, --version            Show version information and exit.');
         Prompt::output('  -d, --dir <dir>          Specify a custom working directory.');
         Prompt::output('  -f, --phakefile <file>   Specify a custom Phakefile.');
-
-        Prompt::output('');
-        Prompt::output(ANSI::fg('Commands:', ANSI::YELLOW));
-        foreach ($runner->commands as $command => $description) {
-            Prompt::output('  '.str_pad($command, 10).$description);
-        }
+        Prompt::output('  -t, --tasks              List all tasks defined in the Phakefile and exit.');
+        Prompt::output('  -g, --groups             List all groups defined in the Phakefile and exit.');
 
         Prompt::output('');
         Prompt::output(ANSI::fg('Tasks:', ANSI::YELLOW));
