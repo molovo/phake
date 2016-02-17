@@ -21,12 +21,16 @@ class Help
         Prompt::output('  -t, --tasks              List all tasks defined in the Phakefile and exit.');
         Prompt::output('  -g, --groups             List all groups defined in the Phakefile and exit.');
 
-        Prompt::output('');
-        Prompt::output(ANSI::fg('Tasks:', ANSI::YELLOW));
-        $runner->tasks();
+        if (file_exists($runner->phakefile)) {
+            require_once $runner->phakefile;
 
-        Prompt::output('');
-        Prompt::output(ANSI::fg('Groups:', ANSI::YELLOW));
-        $runner->groups();
+            Prompt::output('');
+            Prompt::output(ANSI::fg('Tasks:', ANSI::YELLOW));
+            $runner->tasks();
+
+            Prompt::output('');
+            Prompt::output(ANSI::fg('Groups:', ANSI::YELLOW));
+            $runner->groups();
+        }
     }
 }

@@ -64,10 +64,13 @@ class Runner
         $this->name = $name;
 
         if ($name === null) {
-            $this->pwd       = $_SERVER['PWD'];
-            $this->phakefile = $this->pwd.'/Phakefile';
+            $this->pwd = $_SERVER['PWD'];
 
             static::$current = $this;
+
+            $this->parseOpts();
+
+            $this->phakefile = $this->phakefile ?: $this->pwd.'/Phakefile';
 
             // Check that the phakefile exists
             if (!file_exists($this->phakefile)) {
@@ -76,8 +79,6 @@ class Runner
 
             // Require the phakefile
             require_once $this->phakefile;
-
-            $this->parseOpts();
 
             // Get the arguments passed.
             $args = $_SERVER['argv'];
@@ -161,17 +162,32 @@ class Runner
         }
 
         if (isset($opts['help']) || isset($opts['h'])) {
-            require_once $this->phakefile;
             Help::render($this);
             exit;
         }
 
         if (isset($opts['tasks']) || isset($opts['t'])) {
+            // Check that the phakefile exists
+            if (!file_exists($this->phakefile)) {
+                throw new PhakefileNotFoundException;
+            }
+
+            // Require the phakefile
+            require_once $this->phakefile;
+
             $this->tasks();
             exit;
         }
 
         if (isset($opts['groups']) || isset($opts['g'])) {
+            // Check that the phakefile exists
+            if (!file_exists($this->phakefile)) {
+                throw new PhakefileNotFoundException;
+            }
+
+            // Require the phakefile
+            require_once $this->phakefile;
+
             $this->groups();
             exit;
         }
