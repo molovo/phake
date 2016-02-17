@@ -157,7 +157,7 @@ class Runner
 
         if (isset($opts['version']) || isset($opts['v'])) {
             Prompt::output(ANSI::fg('Phake', ANSI::YELLOW));
-            Prompt::output('Version 1.0.1');
+            Prompt::output('Version 1.0.2');
             exit;
         }
 
