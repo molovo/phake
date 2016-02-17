@@ -169,3 +169,10 @@ To use a different filename, or a Phakefile outside of the directory, use the
 phake --phakefile=/your/custom/file
 phake -f/your/custom/file
 ```
+
+To list all tasks or groups in a Phakefile, use the `--tasks` or `--groups` options.
+
+```sh
+phake --tasks
+phake --groups
+```
