@@ -42,7 +42,7 @@ if (!function_exists('run')) {
      */
     function run($name, array $args = [])
     {
-        $task = Runner::task($name);
+        $task = Runner::current()->task($name);
 
         return $task->run($args);
     }
