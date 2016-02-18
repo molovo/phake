@@ -28,31 +28,45 @@
 # Description
 # -----------
 #
-#  Completion script for phake 1.0.0 (https://github.com/molovo/phake).
+#  Completion script for phake 0.2.0 (https://github.com/molovo/phake).
 #
 # ------------------------------------------------------------------------------
 # Authors
 # -------
 #
-#  * James Dinsdale <hi@molovo.co> (version 1.0.0)
+#  * James Dinsdale <hi@molovo.co> (version 0.2.0)
 #
 # ------------------------------------------------------------------------------
 
 _phake() {
   local curcontext="$curcontext" state line
-  local commands
+  local commands groups tasks _phake_groups _phake_tasks
 
-  _arguments -s -S \
-    '(--tasks)--tasks[list all tasks defined in the Phakefile and exit]' \
-    '(--groups)--groups[list all groups defined in the Phakefile and exit]' \
-    '(--dir)--dir[specify a custom working directory]' \
-    '(--phakefile)--phakefile[specify a custom Phakefile]' \
-    '(--help)--help[show help text and exit]' \
-    '(--version)--version[show version information and exit]'
+  _arguments \
+    '(-t --tasks)'{-t,--tasks}'[list all tasks defined in the Phakefile and exit]' \
+    '(-g --groups)'{-g,--groups}'[list all groups defined in the Phakefile and exit]' \
+    '(-d --dir)'{-d,--dir}'[specify a custom working directory]:directory:_files' \
+    '(-f --phakefile)'{-f,--phakefile}'[specify a custom Phakefile]:phakefile:_files' \
+    '(-h --help)'{-h,--help}'[show help text and exit]' \
+    '(-v --version)'{-v,--version}'[show version information and exit]'
+
+  tasks=()
+  _phake_tasks=$(phake --tasks)
+
+  if test $? -eq 0; then
+    tasks=(${_phake_tasks})
+  fi
+
+  groups=()
+  _phake_groups=$(phake --groups)
+
+  if test $? -eq 0; then
+    groups=(${_phake_groups})
+  fi
 
   _alternative \
-    "tasks:task:($(phake --tasks))" \
-    "groups:group:($(phake --groups))"
+    "tasks:task:($tasks)" \
+    "groups:group:($groups)"
 }
 
 _phake "$@"
