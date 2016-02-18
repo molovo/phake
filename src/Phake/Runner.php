@@ -26,6 +26,13 @@ class Runner
     private $groups = [];
 
     /**
+     * An array of command line options.
+     *
+     * @var array
+     */
+    private $opts = [];
+
+    /**
      * The name of the runner.
      *
      * @var string|null
@@ -68,9 +75,9 @@ class Runner
 
             static::$current = $this;
 
-            $this->parseOpts();
+            $this->phakefile = $this->pwd.'/Phakefile';
 
-            $this->phakefile = $this->phakefile ?: $this->pwd.'/Phakefile';
+            $this->parseOpts();
 
             // Check that the phakefile exists
             if (!file_exists($this->phakefile)) {
@@ -90,8 +97,17 @@ class Runner
                 if (strpos($task, '-') === 0) {
                     // Argument is an option, so we remove it
                     unset($args[$index]);
+
+                    // If the next argument is the option's value,
+                    // remove that as well.
+                    $option = preg_replace('/^[-]{1,2}/', '', $task);
+                    if (isset($args[$index + 1]) && $args[$index + 1] === $this->opts[$option]) {
+                        unset($args[$index + 1]);
+                    }
                     continue;
                 }
+
+
             }
 
             // Get the task name and check it is defined
@@ -138,21 +154,33 @@ class Runner
      */
     private function parseOpts()
     {
-        $opts = getopt('hvd::f::tg', [
+        $this->opts = $opts = getopt('hvd:f:tg', [
             'help',
             'version',
-            'dir::',
-            'phakefile::',
+            'dir:',
+            'phakefile:',
             'tasks',
             'groups',
         ]);
 
         if ((isset($opts['dir']) && ($dir = $opts['dir'])) || (isset($opts['d']) && ($dir = $opts['d']))) {
             $this->pwd = $dir;
+            $this->phakefile = $this->pwd.'/Phakefile';
         }
 
         if ((isset($opts['phakefile']) && ($file = $opts['phakefile'])) || (isset($opts['f']) && ($file = $opts['f']))) {
             $this->phakefile = $file;
+
+            // If Phakefile does not exist as an absolute pathname, try a
+            // relative path.
+            if (!file_exists($this->phakefile)) {
+              $this->phakefile = $this->pwd.'/'.$this->phakefile;
+            }
+
+            // If Phakefile still does not exist, throw an exception.
+            if (!file_exists($this->phakefile)) {
+              throw new PhakefileNotFoundException;
+            }
         }
 
         if (isset($opts['version']) || isset($opts['v'])) {
@@ -167,11 +195,6 @@ class Runner
         }
 
         if (isset($opts['tasks']) || isset($opts['t'])) {
-            // Check that the phakefile exists
-            if (!file_exists($this->phakefile)) {
-                throw new PhakefileNotFoundException;
-            }
-
             // Require the phakefile
             require_once $this->phakefile;
 
@@ -180,11 +203,6 @@ class Runner
         }
 
         if (isset($opts['groups']) || isset($opts['g'])) {
-            // Check that the phakefile exists
-            if (!file_exists($this->phakefile)) {
-                throw new PhakefileNotFoundException;
-            }
-
             // Require the phakefile
             require_once $this->phakefile;
 
