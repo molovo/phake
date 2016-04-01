@@ -10,7 +10,8 @@
       }
     ],
     "require": {
-      "molovo/prompt": "~0.1"
+      "molovo/graphite": "^0.1",
+      "molovo/accidents": "^0.1"
     },
     "autoload": {
       "psr-4": {

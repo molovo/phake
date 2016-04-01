@@ -2,35 +2,37 @@
 
 namespace Phake;
 
-use Molovo\Prompt\ANSI;
-use Molovo\Prompt\Prompt;
-
 class Help
 {
     public static function render(Runner $runner)
     {
-        Prompt::output(ANSI::fg('Usage:', ANSI::YELLOW));
-        Prompt::output('  phake [options] [command|task|group]');
+        echo $runner->output->yellow->render('Usage:');
+        echo $runner->output->render('  phake [options] [command|task|group]');
 
-        Prompt::output('');
-        Prompt::output(ANSI::fg('Options:', ANSI::YELLOW));
-        Prompt::output('  -h, --help               Show help text and exit.');
-        Prompt::output('  -v, --version            Show version information and exit.');
-        Prompt::output('  -d, --dir <dir>          Specify a custom working directory.');
-        Prompt::output('  -f, --phakefile <file>   Specify a custom Phakefile.');
-        Prompt::output('  -t, --tasks              List all tasks defined in the Phakefile and exit.');
-        Prompt::output('  -g, --groups             List all groups defined in the Phakefile and exit.');
+        echo $runner->output->render('');
+        echo $runner->output->yellow->render('Options:');
+        echo $runner->output->render('  -h, --help               Show help text and exit.');
+        echo $runner->output->render('  -v, --version            Show version information and exit.');
+        echo $runner->output->render('  -d, --dir <dir>          Specify a custom working directory.');
+        echo $runner->output->render('  -f, --phakefile <file>   Specify a custom Phakefile.');
+        echo $runner->output->render('  -t, --tasks              List all tasks defined in the Phakefile and exit.');
+        echo $runner->output->render('  -g, --groups             List all groups defined in the Phakefile and exit.');
 
         if (file_exists($runner->phakefile)) {
             require_once $runner->phakefile;
 
-            Prompt::output('');
-            Prompt::output(ANSI::fg('Tasks:', ANSI::YELLOW));
-            $runner->tasks();
+            echo $runner->output->render('');
+            echo $runner->output->yellow->render('Tasks:');
 
-            Prompt::output('');
-            Prompt::output(ANSI::fg('Groups:', ANSI::YELLOW));
+            $runner->tasks('  ');
+
+            echo $runner->output->render('');
+            echo $runner->output->yellow->render('Groups:');
+
+            $runner->output->setGlobalIndent(2);
             $runner->groups();
         }
+
+        exit;
     }
 }

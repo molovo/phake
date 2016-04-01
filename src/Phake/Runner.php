@@ -3,8 +3,7 @@
 namespace Phake;
 
 use Closure;
-use Molovo\Prompt\ANSI;
-use Molovo\Prompt\Prompt;
+use Molovo\Graphite\Graphite;
 use Phake\Exceptions\GroupNotFoundException;
 use Phake\Exceptions\PhakefileNotFoundException;
 use Phake\Exceptions\TaskNotFoundException;
@@ -47,6 +46,13 @@ class Runner
     public $parent = null;
 
     /**
+     * Whether quiet mode is on.
+     *
+     * @var bool
+     */
+    public $quiet = false;
+
+    /**
      * The current runner context.
      *
      * @var Runner|null
@@ -68,7 +74,8 @@ class Runner
      */
     public function __construct($name = null)
     {
-        $this->name = $name;
+        $this->name   = $name;
+        $this->output = new Graphite;
 
         if ($name === null) {
             $this->pwd = $_SERVER['PWD'];
@@ -106,8 +113,6 @@ class Runner
                     }
                     continue;
                 }
-
-
             }
 
             // Get the task name and check it is defined
@@ -127,7 +132,7 @@ class Runner
     public function tasks($prefix = null)
     {
         foreach ($this->tasks as $name => $task) {
-            Prompt::output('  '.$prefix.$name);
+            echo $this->output->strip($this->output->render($prefix.$name));
         }
 
         foreach ($this->groups as $group) {
@@ -144,7 +149,7 @@ class Runner
     {
         foreach ($this->groups as $name => $group) {
             $prefix = $this->name !== null ? $this->name.':' : '';
-            Prompt::output('  '.$prefix.$name);
+            echo $this->output->strip($this->output->render($prefix.$name));
             $group->groups($prefix.$group->name.':');
         }
     }
@@ -154,9 +159,10 @@ class Runner
      */
     private function parseOpts()
     {
-        $this->opts = $opts = getopt('hvd:f:tg', [
+        $this->opts = $opts = getopt('hvqd:f:tg', [
             'help',
             'version',
+            'quiet',
             'dir:',
             'phakefile:',
             'tasks',
@@ -164,7 +170,7 @@ class Runner
         ]);
 
         if ((isset($opts['dir']) && ($dir = $opts['dir'])) || (isset($opts['d']) && ($dir = $opts['d']))) {
-            $this->pwd = $dir;
+            $this->pwd       = $dir;
             $this->phakefile = $this->pwd.'/Phakefile';
         }
 
@@ -174,24 +180,28 @@ class Runner
             // If Phakefile does not exist as an absolute pathname, try a
             // relative path.
             if (!file_exists($this->phakefile)) {
-              $this->phakefile = $this->pwd.'/'.$this->phakefile;
+                $this->phakefile = $this->pwd.'/'.$this->phakefile;
             }
 
             // If Phakefile still does not exist, throw an exception.
             if (!file_exists($this->phakefile)) {
-              throw new PhakefileNotFoundException;
+                throw new PhakefileNotFoundException;
             }
         }
 
         if (isset($opts['version']) || isset($opts['v'])) {
-            Prompt::output(ANSI::fg('Phake', ANSI::YELLOW));
-            Prompt::output('Version 1.0.3');
+            echo $this->output->yellow->render('Phake');
+            echo $this->output->render('  Version 1.1.0');
             exit;
         }
 
         if (isset($opts['help']) || isset($opts['h'])) {
             Help::render($this);
             exit;
+        }
+
+        if (isset($opts['quiet']) || isset($opts['h'])) {
+            $this->quiet = true;
         }
 
         if (isset($opts['tasks']) || isset($opts['t'])) {
@@ -222,12 +232,14 @@ class Runner
             // Run the tasks
             foreach ($args as $taskname) {
                 $task = $this->task($taskname);
+
+                echo $this->output->gray->render('    Running '.$taskname.'...');
                 $task->run($args);
             }
 
             // Output a success message
-            $msg = ANSI::fg('Tasks finished successfully', ANSI::GREEN);
-            Prompt::output($msg);
+            echo $this->output->render('');
+            echo $this->output->green->render('    All tasks finished successfully');
             exit(0);
         }
 

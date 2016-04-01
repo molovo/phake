@@ -12,8 +12,8 @@ if (!function_exists('task')) {
      */
     function task($name, $callback)
     {
-        $task   = new Task($name, $callback);
         $runner = Runner::current();
+        $task   = new Task($name, $callback, $runner);
         $runner->registerTask($task);
     }
 }

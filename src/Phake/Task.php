@@ -2,9 +2,10 @@
 
 namespace Phake;
 
+use Accidents\ExceptionHandler;
 use Closure;
-use Molovo\Prompt\ANSI;
-use Molovo\Prompt\Prompt;
+use Exception;
+use Molovo\Graphite\Graphite;
 use ReflectionFunction;
 
 class Task
@@ -24,15 +25,25 @@ class Task
     private $callback;
 
     /**
+     * The parent runner for this test.
+     *
+     * @var Runner
+     */
+    private $runner;
+
+    /**
      * Create a new task instance.
      *
      * @param string               $name     The task name
      * @param string|array|Closure $callback The command to run
+     * @param Runner|null          $runner   The parent task runner
      */
-    public function __construct($name, $callback)
+    public function __construct($name, $callback, Runner $runner = null)
     {
         $this->name     = $name;
         $this->callback = $this->parseCallback($callback);
+        $this->runner   = $runner;
+        $this->output   = new Graphite;
     }
 
     /**
@@ -50,7 +61,7 @@ class Task
         // a shell command directly
         if (is_string($callback)) {
             return function () use ($callback, $task) {
-                $task->executeProcess($callback);
+                return $task->executeProcess($callback);
             };
         }
 
@@ -59,7 +70,11 @@ class Task
         if (is_array($callback)) {
             return function () use ($callback, $task) {
                 foreach ($callback as $cmd) {
-                    $task->executeProcess($cmd);
+                    $status = $task->executeProcess($cmd);
+
+                    if ($status > 0) {
+                        return $status;
+                    }
                 }
             };
         }
@@ -67,7 +82,18 @@ class Task
         // If the passed callback is already a closure, we can just
         // use it as it is
         if ($callback instanceof Closure) {
-            return $callback;
+            return function () use ($callback, $task) {
+                try {
+                    $callback();
+
+                    return 0;
+                } catch (Exception $e) {
+                    $handler = new ExceptionHandler;
+                    $handler($e);
+
+                    return 1;
+                }
+            };
         }
 
         // If nothing has been returned yet, then we throw an exception
@@ -79,7 +105,7 @@ class Task
      *
      * @param string $cmd The command to execute
      */
-    private function executeProcess($cmd)
+    public function executeProcess($cmd)
     {
         $cwd    = $_SERVER['PWD'];
         $status = 0;
@@ -101,10 +127,9 @@ class Task
         // so we set the exit status to 1
         if (!is_resource($process)) {
             // Echo a failure message to the screen
-            $cmd = ANSI::fg($cmd, ANSI::YELLOW);
-            $msg = 'Phake was unable to run the command '.$cmd;
-            Prompt::output(ANSI::fg($msg, ANSI::RED));
-            $status = 1;
+            $this->output->red->render('  x Task '.$this->name.' failed to launch external process '.$cmd);
+
+            return 1;
         }
 
         // If the process is a resource, it was created successfully
@@ -121,13 +146,25 @@ class Task
             $status = proc_close($process);
         }
 
-        // If command exited with status > 0 we should exit with
-        // the same status
-        if ($status > 0) {
-            $msg = 'Task '.$this->name.' exited with status '.$status;
-            Prompt::output(ANSI::fg($msg, ANSI::RED));
-            exit((int) $status);
+        return $status;
+    }
+
+    /**
+     * Get the line width of the current terminal.
+     *
+     * @return int
+     */
+    private function getLineWidth()
+    {
+        $line_width = isset($_ENV['COLUMNS']) && $_ENV['COLUMNS']
+                    ? $_ENV['COLUMNS']
+                    : 0;
+
+        if ($line_width === 0) {
+            $line_width = exec('tput cols');
         }
+
+        return $line_width;
     }
 
     /**
@@ -140,18 +177,33 @@ class Task
         // Get the start time of the process
         $time = microtime(true);
 
-        // Output a message to the screen
-        $msg = 'Running task '.$this->name.'...';
-        Prompt::output(ANSI::fg($msg, ANSI::GRAY));
-
         // Invoke the callback
-        $func   = new ReflectionFunction($this->callback);
+        $func = new ReflectionFunction($this->callback);
+
+        ob_start();
         $status = $func->invokeArgs($args);
+
+        $output = '';
+        while (ob_get_level() > 0) {
+            $output .= ob_get_clean();
+        }
+
+        if (!$this->runner->quiet) {
+            echo $output;
+        }
+
+        if ($status > 0) {
+            $errorMessage = $this->output->red('  x Task '.$this->name.' failed...');
+            echo $this->output->render($errorMessage);
+
+            return;
+        }
 
         // Output a success message to the screen
         $time = ceil((microtime(true) - $time) * 1000);
-        $msg  = 'Task '.$this->name.' finished in '.$time.'ms';
-        Prompt::output(ANSI::fg($msg, ANSI::GRAY));
-        Prompt::output('');
+
+        $successMessage = $this->output->green('  ✓ ');
+        $successMessage .= $this->output->white('Finished '.$this->name.' in ').$this->output->yellow($time.'ms');
+        echo $this->output->render($successMessage);
     }
 }

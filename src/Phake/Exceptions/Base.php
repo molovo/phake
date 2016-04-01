@@ -2,8 +2,7 @@
 
 namespace Phake\Exceptions;
 
-use Molovo\Prompt\ANSI;
-use Molovo\Prompt\Prompt;
+use Molovo\Graphite\Graphite;
 
 class Base extends \Exception
 {
@@ -19,8 +18,7 @@ class Base extends \Exception
         $this->message = $message ?: $this->message;
 
         // Output the message to stdout
-        $msg = ANSI::fg($this->message, ANSI::RED);
-        Prompt::output($msg);
+        echo(new Graphite)->red->render($this->message);
 
         // Exit with error status
         exit(1);

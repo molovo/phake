@@ -1,12 +1,16 @@
 #!/usr/bin/env php
 <?php
 
+use Accidents\Handler;
+
 // Load dependencies
 if (file_exists(__DIR__.'/../../autoload.php')) {
     require __DIR__.'/../../autoload.php';
 } else {
     require __DIR__.'/vendor/autoload.php';
 }
+
+Handler::register();
 
 $runner = new Phake\Runner();
 $runner->run();
