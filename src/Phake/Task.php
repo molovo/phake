@@ -129,7 +129,7 @@ class Task
             // Echo a failure message to the screen
             $this->output->red->render('  x Task '.$this->name.' failed to launch external process '.$cmd);
 
-            return 1;
+            exit(1);
         }
 
         // If the process is a resource, it was created successfully
@@ -196,7 +196,7 @@ class Task
             $errorMessage = $this->output->red('  x Task '.$this->name.' failed...');
             echo $this->output->render($errorMessage);
 
-            return;
+            exit((int) $status);
         }
 
         // Output a success message to the screen
