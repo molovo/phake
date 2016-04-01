@@ -47,6 +47,7 @@ _phake() {
     '(-g --groups)'{-g,--groups}'[list all groups defined in the Phakefile and exit]' \
     '(-d --dir)'{-d,--dir}'[specify a custom working directory]:directory:_files' \
     '(-f --phakefile)'{-f,--phakefile}'[specify a custom Phakefile]:phakefile:_files' \
+    '(-q --quiet)'{-q,--quiet}'[hide output produced by tasks]' \
     '(-h --help)'{-h,--help}'[show help text and exit]' \
     '(-v --version)'{-v,--version}'[show version information and exit]'
 
