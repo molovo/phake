@@ -191,7 +191,7 @@ class Runner
 
         if (isset($opts['version']) || isset($opts['v'])) {
             echo $this->output->yellow->render('Phake');
-            echo $this->output->render('  Version 1.1.0');
+            echo $this->output->render('  Version 1.1.1');
             exit;
         }
 
