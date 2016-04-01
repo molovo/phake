@@ -176,3 +176,9 @@ To list all tasks or groups in a Phakefile, use the `--tasks` or `--groups` opti
 phake --tasks
 phake --groups
 ```
+
+To hide any output produced by your tasks, use the `--quiet` (`-q`) option.
+
+```sh
+phake --quiet
+```
