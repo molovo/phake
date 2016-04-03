@@ -1,5 +1,7 @@
 # Phake
 
+[![Join the chat at https://gitter.im/molovo/phake](https://badges.gitter.im/molovo/phake.svg)](https://gitter.im/molovo/phake?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A PHP task runner inspired by Make, Rake et al.
 
 ## Installation and Usage
