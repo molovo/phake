@@ -201,7 +201,7 @@ class Runner
             exit;
         }
 
-        if (isset($opts['quiet']) || isset($opts['h'])) {
+        if (isset($opts['quiet']) || isset($opts['q'])) {
             $this->quiet = true;
         }
 
