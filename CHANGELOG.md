@@ -1,4 +1,12 @@
 
+v1.1.2 / 2016-06-09
+===================
+
+  * Manage version using Phakefile
+  * Add a changelog
+  * Merge pull request #1 from gitter-badger/gitter-badge
+  * Add Gitter badge
+
 v1.1.1 / 2016-04-01
 ===================
 
