@@ -1,4 +1,9 @@
 
+v1.1.3 / 2016-06-09
+===================
+
+  * Fix quiet option, and add to usage information
+
 v1.1.2 / 2016-06-09
 ===================
 
