@@ -190,8 +190,9 @@ class Runner
         }
 
         if (isset($opts['version']) || isset($opts['v'])) {
+            $version = file_get_contents(dirname(dirname(__DIR__)).'/.version');
             echo $this->output->yellow->render('Phake');
-            echo $this->output->render('  Version 1.1.1');
+            echo $this->output->render('  Version '.$version);
             exit;
         }
 
