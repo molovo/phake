@@ -27,8 +27,8 @@ if (!function_exists('group')) {
      */
     function group($name, Closure $callback)
     {
-        $group  = new Runner($name);
         $runner = Runner::current();
+        $group  = new Runner($name, $runner);
         $runner->registerGroup($group, $callback);
     }
 }

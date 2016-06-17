@@ -72,12 +72,18 @@ class Runner
     /**
      * Create the task runner instance.
      */
-    public function __construct($name = null)
+    public function __construct($name = null, $parent = null)
     {
         $this->name   = $name;
         $this->output = new Graphite;
 
-        if ($name === null) {
+        if ($parent !== null) {
+            $this->parent = $parent;
+            $this->opts   = $parent->opts;
+            $this->quiet  = $parent->quiet;
+        }
+
+        if ($parent === null) {
             $this->pwd = $_SERVER['PWD'];
 
             static::$current = $this;
