@@ -1,4 +1,10 @@
 
+v1.1.4 / 2016-06-17
+===================
+
+  * Pass options from parent runner through to groups correctly (Fixes issue where groups did not respect quiet mode
+  * Add Phakefile to repository
+
 v1.1.3 / 2016-06-09
 ===================
 
